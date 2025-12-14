@@ -1,0 +1,67 @@
+## Visual Studio Specific
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.opensdf
+*.sdf
+*.cache
+*.box
+*.ncrunch*
+(debug)
+(release)
+
+## Build Results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug*/
+[Rr]elease*/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## WPF / Windows Specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+## NuGet Packages
+*.nupkg
+# The packages folder can generally be ignored because of Package Restore.
+**/packages/*
+# except build/, which is used as an MSBuild target.
+!**/packages/build/
+# If using the old project format with packages.config, you might need this:
+# !**/packages/repositories.config
+# !**/packages/packages.config
+# However, modern WPF (SDK style) usually doesn't need the above lines.
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Visual Studio Code (if used)
+.vscode/
+
+## Test Results
+TestResults/
+*.trdx
+
+## Prism / Modular Architecture Specific
+# Prismのモジュール開発で、特定の出力先を指定している場合、
+# そのフォルダも除外対象にする必要があります（例: Modulesフォルダ）。
+# 一般的に bin/ に出力される場合は上記設定でカバーされます。
+# Modules/ 
+
+## User-specific files (Secrets)
+# APIキーや接続文字列を含む設定ファイルはコミットしないよう注意してください。
+# appsettings.Development.json
+# secrets.json
