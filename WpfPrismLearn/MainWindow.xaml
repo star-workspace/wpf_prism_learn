@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:prism="http://prismlibrary.com/"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:views="clr-namespace:WpfPrismLearn.Views"
         prism:ViewModelLocator.AutoWireViewModel="True"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
@@ -15,85 +16,97 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
-    
+
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <!-- ヘッダー領域 -->
-        <ContentControl Grid.Row="0" 
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <!-- ヘッダー領域 -->
+            <ContentControl Grid.Row="0" 
                         prism:RegionManager.RegionName="HeaderRegion"/>
 
-        <StackPanel Grid.Row="1" Margin="20">
-            <TextBlock Text="ここはメインウインドウの本体です。"
+            <StackPanel Grid.Row="1" Margin="20">
+                <TextBlock Text="ここはメインウインドウの本体です。"
                        Margin="0,0,0,10"
                        Style="{StaticResource MaterialDesignHeadline4TextBlock}"/>
-            <TextBox Text="{Binding InputName, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Text="{Binding InputName, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                      Height="30"/>
-            <Button Content="挨拶する"
+                <Button Content="挨拶する"
                     Command="{Binding GreetCommand}"
                     Margin="0,10"
                     Style="{StaticResource MaterialDesignRaisedButton}"/>
-            <materialDesign:Card Margin="0,20,0,0" Padding="10" Background="#EEEEEE" UniformCornerRadius="6">
-                <TextBlock Text="{Binding ResultMessage}"
+                <materialDesign:Card Margin="0,20,0,0" Padding="10" Background="#EEEEEE" UniformCornerRadius="6">
+                    <TextBlock Text="{Binding ResultMessage}"
                            FontSize="14" 
                            Foreground="{DynamicResource PrimaryHueMidBrush}"
                            TextWrapping="Wrap"/>
-            </materialDesign:Card>
+                </materialDesign:Card>
 
-            <TextBlock Text="Gallery" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,20,0,10"/>
+                <TextBlock Text="Gallery" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,20,0,10"/>
 
-            <ItemsControl ItemsSource="{Binding ImageItems}">
+                <ItemsControl ItemsSource="{Binding ImageItems}">
 
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
 
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <materialDesign:Card Margin="5" Width="120" UniformCornerRadius="8">
-                            <materialDesign:Card.InputBindings>
-                                <MouseBinding MouseAction="LeftClick" 
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <materialDesign:Card Margin="5" Width="120" UniformCornerRadius="8">
+                                <materialDesign:Card.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" 
                                               Command="{Binding DataContext.SelectImageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                               CommandParameter="{Binding}" />
-                            </materialDesign:Card.InputBindings>
+                                </materialDesign:Card.InputBindings>
 
-                            <Grid>
-                                <StackPanel>
-                                    <Image Source="{Binding ImageUrl}" Height="80" Stretch="UniformToFill"/>
+                                <Grid>
+                                    <StackPanel>
+                                        <Image Source="{Binding ImageUrl}" Height="80" Stretch="UniformToFill"/>
 
-                                    <TextBlock Text="{Binding Title}" 
+                                        <TextBlock Text="{Binding Title}" 
                                                HorizontalAlignment="Center" 
                                                Margin="5"
                                                FontSize="12"/>
-                                </StackPanel>
+                                    </StackPanel>
 
-                                <materialDesign:PackIcon Kind="CheckCircle" 
+                                    <materialDesign:PackIcon Kind="CheckCircle" 
                                                          Width="40" Height="40"
                                                          Foreground="LimeGreen"
                                                          HorizontalAlignment="Right"
                                                          VerticalAlignment="Top"
                                                          Margin="5"
                                                          Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <materialDesign:PackIcon.Effect>
-                                        <DropShadowEffect ShadowDepth="0" Color="Black" BlurRadius="10"/>
-                                    </materialDesign:PackIcon.Effect>
-                                </materialDesign:PackIcon>
+                                        <materialDesign:PackIcon.Effect>
+                                            <DropShadowEffect ShadowDepth="0" Color="Black" BlurRadius="10"/>
+                                        </materialDesign:PackIcon.Effect>
+                                    </materialDesign:PackIcon>
 
-                                <Border Background="#44000000" 
+                                    <Border Background="#44000000" 
                                         Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                            </Grid>
-                        </materialDesign:Card>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
+                                </Grid>
+                            </materialDesign:Card>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
 
-            </ItemsControl>
-        </StackPanel>
+                </ItemsControl>
+            </StackPanel>
+        </Grid>
+
+        <Grid Visibility="{Binding IsModalVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+            <Border Background="Black" Opacity="0.5">
+            </Border>
+
+            <views:SimpleModal HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        </Grid>
     </Grid>
+
     
     
 </Window>

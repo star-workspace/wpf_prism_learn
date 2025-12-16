@@ -25,8 +25,23 @@ namespace WpfPrismLearn
             set { SetProperty(ref _resultMessage, value); }
         }
 
+        private bool _isModalVisible;
+        public bool IsModalVisible
+        {
+            get { return _isModalVisible; }
+            set { SetProperty(ref _isModalVisible, value); }
+        }
+
+        private string _modalMessage = string.Empty;
+        public string ModalMessage
+        {
+            get { return _modalMessage; }
+            set { SetProperty(ref _modalMessage, value); }
+        }
+
         public DelegateCommand GreetCommand { get; }
         public DelegateCommand<ImageItem> SelectImageCommand { get; }
+        public DelegateCommand CloseModalCommand { get; }
 
         public ObservableCollection<ImageItem> ImageItems { get; } = new ObservableCollection<ImageItem>();
 
@@ -34,6 +49,7 @@ namespace WpfPrismLearn
         {
             _greetingService = greetingService;
             GreetCommand = new DelegateCommand(ExecuteGreet);
+
 
             SelectImageCommand = new DelegateCommand<ImageItem>(item =>
             {
@@ -45,6 +61,11 @@ namespace WpfPrismLearn
 
                 // 2. クリックされた画像だけを選択状態にする
                 item.IsSelected = true;
+            });
+
+            CloseModalCommand = new DelegateCommand(() =>
+            {
+                IsModalVisible = false;
             });
 
             LoadSampleImages();
@@ -62,11 +83,11 @@ namespace WpfPrismLearn
         {
             if (string.IsNullOrWhiteSpace(InputName))
             {
-                ResultMessage = "Please enter your name.";
+                ModalMessage = "名前を入力してください！";
             }
             else
             {
-                ResultMessage = _greetingService.GetMessage(InputName);
+                ModalMessage = _greetingService.GetMessage(InputName);
 
                 ImageItems.Add(new ImageItem
                 {
@@ -74,6 +95,7 @@ namespace WpfPrismLearn
                     ImageUrl = $"https://picsum.photos/seed/{20 + ImageItems.Count}/200/150"
                 });
             }
+            IsModalVisible = true; // ★これで表示される
         }
     }
 }
