@@ -23,6 +23,9 @@ namespace WpfPrismLearn
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.Register<IGreetingService, GreetingService>();
+
+            containerRegistry.RegisterForNavigation<MessageView>();
+            containerRegistry.RegisterForNavigation<DetailView>();
         }
 
         // 3. アプリケーション起動時の初期化処理を行うメソッド
@@ -37,6 +40,9 @@ namespace WpfPrismLearn
             // モーダル内のヘッダーとフッター
             regionManager.RegisterViewWithRegion("ModalHeaderRegion", typeof(ModalHeader));
             regionManager.RegisterViewWithRegion("ModalFooterRegion", typeof(ModalFooter));
+
+            // 最初はモーダルはMessageViewを表示
+            regionManager.RequestNavigate("ModalContentRegion", "MessageView");
         }
     }
 

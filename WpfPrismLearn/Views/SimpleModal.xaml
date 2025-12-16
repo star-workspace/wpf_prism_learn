@@ -16,12 +16,8 @@
             <ContentControl Grid.Row="0"
                          prism:RegionManager.RegionName="ModalHeaderRegion"/>
 
-            <TextBlock Text="{Binding ModalMessage}" 
-                       Grid.Row="1" 
-                       HorizontalAlignment="Center" 
-                       VerticalAlignment="Center" 
-                       TextWrapping="Wrap"
-                       FontSize="16"/>
+            <ContentControl Grid.Row="1"
+                         prism:RegionManager.RegionName="ModalContentRegion"/>
 
             <ContentControl Grid.Row="2"
                          prism:RegionManager.RegionName="ModalFooterRegion"/>

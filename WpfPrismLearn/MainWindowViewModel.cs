@@ -10,6 +10,9 @@ namespace WpfPrismLearn
     class MainWindowViewModel : BindableBase
     {
         private readonly IGreetingService _greetingService;
+        private readonly IRegionManager _regionManager;
+
+        private bool _isDetailMode = false;
 
         private string _inputName = string.Empty;
         public string InputName
@@ -42,14 +45,16 @@ namespace WpfPrismLearn
         public DelegateCommand GreetCommand { get; }
         public DelegateCommand<ImageItem> SelectImageCommand { get; }
         public DelegateCommand CloseModalCommand { get; }
+        public DelegateCommand SwitchContentCommand { get; }
 
         public ObservableCollection<ImageItem> ImageItems { get; } = new ObservableCollection<ImageItem>();
 
-        public MainWindowViewModel(IGreetingService greetingService)
+        public MainWindowViewModel(IGreetingService greetingService, IRegionManager regionManager)
         {
             _greetingService = greetingService;
-            GreetCommand = new DelegateCommand(ExecuteGreet);
+            _regionManager = regionManager;
 
+            GreetCommand = new DelegateCommand(ExecuteGreet);
 
             SelectImageCommand = new DelegateCommand<ImageItem>(item =>
             {
@@ -66,6 +71,18 @@ namespace WpfPrismLearn
             CloseModalCommand = new DelegateCommand(() =>
             {
                 IsModalVisible = false;
+            });
+
+            SwitchContentCommand = new DelegateCommand(() =>
+            {
+                // フラグを反転
+                _isDetailMode = !_isDetailMode;
+
+                // 表示するView名を決定 (App.xaml.csで登録したクラス名)
+                string viewName = _isDetailMode ? "DetailView" : "MessageView";
+
+                // 指定したRegionに、指定したViewへ遷移(Navigate)するよう依頼
+                _regionManager.RequestNavigate("ModalContentRegion", viewName);
             });
 
             LoadSampleImages();
