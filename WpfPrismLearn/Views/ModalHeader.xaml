@@ -1,0 +1,9 @@
+﻿<UserControl x:Class="WpfPrismLearn.Views.ModalHeader"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <TextBlock Text="お知らせ" 
+               Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+               HorizontalAlignment="Center"/>
+</UserControl>

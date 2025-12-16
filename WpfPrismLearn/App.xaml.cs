@@ -33,6 +33,10 @@ namespace WpfPrismLearn
             var regionManager = Container.Resolve<IRegionManager>();
 
             regionManager.RegisterViewWithRegion("HeaderRegion", typeof(HeaderView));
+
+            // モーダル内のヘッダーとフッター
+            regionManager.RegisterViewWithRegion("ModalHeaderRegion", typeof(ModalHeader));
+            regionManager.RegisterViewWithRegion("ModalFooterRegion", typeof(ModalFooter));
         }
     }
 
