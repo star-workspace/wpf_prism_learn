@@ -45,6 +45,35 @@
                            TextWrapping="Wrap"/>
                 </materialDesign:Card>
 
+                <materialDesign:Card Margin="0,20,0,20" Padding="10" Background="#E3F2FD">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="現在の選択画像：" 
+                           VerticalAlignment="Center" 
+                           FontWeight="Bold" 
+                           Margin="0,0,10,0"/>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Image Source="{Binding ConfirmedImage.ImageUrl}" 
+                           Width="50" Height="40" Stretch="Uniform" Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding ConfirmedImage.Title}" 
+                               VerticalAlignment="Center" 
+                               FontSize="16"
+                               Foreground="Blue"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Column="1" 
+                           Text="（まだ選択されていません）" 
+                           VerticalAlignment="Center" 
+                           Foreground="Gray"
+                           Visibility="{Binding ConfirmedImage, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                    </Grid>
+                </materialDesign:Card>
+
                 <TextBlock Text="Gallery" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,20,0,10"/>
 
                 <ItemsControl ItemsSource="{Binding ImageItems}">

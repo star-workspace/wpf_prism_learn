@@ -1,9 +1,11 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Events;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using WpfPrismLearn.Models;
 using WpfPrismLearn.Services;
+using WpfPrismLearn.Events;
 
 namespace WpfPrismLearn
 {
@@ -11,6 +13,7 @@ namespace WpfPrismLearn
     {
         private readonly IGreetingService _greetingService;
         private readonly IRegionManager _regionManager;
+        private readonly IEventAggregator _eventAggregator;
 
         private bool _isDetailMode = false;
 
@@ -42,6 +45,13 @@ namespace WpfPrismLearn
             set { SetProperty(ref _modalMessage, value); }
         }
 
+        private ImageItem _confirmedImage;
+        public ImageItem ConfirmedImage
+        {
+            get { return _confirmedImage; }
+            set { SetProperty(ref _confirmedImage, value); }
+        }
+
         public DelegateCommand GreetCommand { get; }
         public DelegateCommand<ImageItem> SelectImageCommand { get; }
         public DelegateCommand CloseModalCommand { get; }
@@ -49,10 +59,24 @@ namespace WpfPrismLearn
 
         public ObservableCollection<ImageItem> ImageItems { get; } = new ObservableCollection<ImageItem>();
 
-        public MainWindowViewModel(IGreetingService greetingService, IRegionManager regionManager)
+        public MainWindowViewModel(IGreetingService greetingService, IRegionManager regionManager, IEventAggregator eventAggregator)
         {
             _greetingService = greetingService;
             _regionManager = regionManager;
+            _eventAggregator = eventAggregator;
+
+            _eventAggregator.GetEvent<ImageConfirmedEvent>().Subscribe(image =>
+            {
+                ConfirmedImage = image;
+                // 確定したらモーダルを閉じるならここに追加
+                IsModalVisible = false;
+            });
+
+            // FooterViewModelから「閉じて」と言われたらここが動く
+            _eventAggregator.GetEvent<CloseModalEvent>().Subscribe(() =>
+            {
+                IsModalVisible = false;
+            });
 
             GreetCommand = new DelegateCommand(ExecuteGreet);
 
@@ -66,6 +90,18 @@ namespace WpfPrismLearn
 
                 // 2. クリックされた画像だけを選択状態にする
                 item.IsSelected = true;
+
+                IsModalVisible = true;
+                ModalMessage = "詳細を読み込んでいます…";
+
+                _regionManager.RequestNavigate("ModalContentRegion", "DetailView", result =>
+                {
+                    // ナビゲーション完了後にイベントを発行して、DetailViewModelに選択された画像を通知
+                    if (result.Success)
+                    {
+                        _eventAggregator.GetEvent<ImageSelectedEvent>().Publish(item);
+                    }
+                });
             });
 
             CloseModalCommand = new DelegateCommand(() =>
@@ -86,6 +122,7 @@ namespace WpfPrismLearn
             });
 
             LoadSampleImages();
+            _eventAggregator = eventAggregator;
         }
 
         private void LoadSampleImages()
