@@ -52,10 +52,18 @@ namespace WpfPrismLearn
             set { SetProperty(ref _confirmedImage, value); }
         }
 
+        private bool _isConfirmedImageActive;
+        public bool IsConfirmedImageActive
+        {
+            get { return _isConfirmedImageActive; }
+            set { SetProperty(ref _isConfirmedImageActive, value); }
+        }
+
         public DelegateCommand GreetCommand { get; }
         public DelegateCommand<ImageItem> SelectImageCommand { get; }
         public DelegateCommand CloseModalCommand { get; }
         public DelegateCommand SwitchContentCommand { get; }
+        public DelegateCommand ToggleConfirmedImageCommand { get; }
 
         public ObservableCollection<ImageItem> ImageItems { get; } = new ObservableCollection<ImageItem>();
 
@@ -70,6 +78,9 @@ namespace WpfPrismLearn
                 ConfirmedImage = image;
                 // 確定したらモーダルを閉じるならここに追加
                 IsModalVisible = false;
+
+                // 新しい画像が反映されたら、赤枠は一旦リセット（解除）しておく
+                IsConfirmedImageActive = false;
             });
 
             // FooterViewModelから「閉じて」と言われたらここが動く
@@ -119,6 +130,12 @@ namespace WpfPrismLearn
 
                 // 指定したRegionに、指定したViewへ遷移(Navigate)するよう依頼
                 _regionManager.RequestNavigate("ModalContentRegion", viewName);
+            });
+
+            ToggleConfirmedImageCommand = new DelegateCommand(() =>
+            {
+                // true <-> false を反転させる (トグル動作)
+                IsConfirmedImageActive = !IsConfirmedImageActive;
             });
 
             LoadSampleImages();

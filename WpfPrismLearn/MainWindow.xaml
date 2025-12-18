@@ -45,34 +45,59 @@
                            TextWrapping="Wrap"/>
                 </materialDesign:Card>
 
-                <materialDesign:Card Margin="0,20,0,20" Padding="10" Background="#E3F2FD">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                <Border Margin="0,20,0,20" CornerRadius="8">
 
-                        <TextBlock Text="現在の選択画像：" 
-                           VerticalAlignment="Center" 
-                           FontWeight="Bold" 
-                           Margin="0,0,10,0"/>
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="BorderThickness" Value="3"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
 
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Image Source="{Binding ConfirmedImage.ImageUrl}" 
-                           Width="50" Height="40" Stretch="Uniform" Margin="0,0,10,0"/>
-                            <TextBlock Text="{Binding ConfirmedImage.Title}" 
-                               VerticalAlignment="Center" 
-                               FontSize="16"
-                               Foreground="Blue"/>
-                        </StackPanel>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConfirmedImageActive}" Value="True">
+                                    <Setter Property="BorderBrush" Value="Red"/>
+                                    <Setter Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect Color="Red" BlurRadius="10" ShadowDepth="0" Opacity="0.6"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
 
-                        <TextBlock Grid.Column="1" 
-                           Text="（まだ選択されていません）" 
-                           VerticalAlignment="Center" 
-                           Foreground="Gray"
-                           Visibility="{Binding ConfirmedImage, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}"/>
-                    </Grid>
-                </materialDesign:Card>
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding ToggleConfirmedImageCommand}"/>
+                    </Border.InputBindings>
+                    
+                    <materialDesign:Card Margin="0,20,0,20" Padding="10" Background="#E3F2FD">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="現在の選択画像：" 
+                                       VerticalAlignment="Center" 
+                                       FontWeight="Bold" 
+                                       Margin="0,0,10,0"/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Image Source="{Binding ConfirmedImage.ImageUrl}" 
+                                       Width="50" Height="40" Stretch="Uniform" Margin="0,0,10,0"/>
+                                <TextBlock Text="{Binding ConfirmedImage.Title}" 
+                                           VerticalAlignment="Center" 
+                                           FontSize="16"
+                                           Foreground="Blue"/>
+                                </StackPanel>
+
+                            <TextBlock Grid.Column="1" 
+                                       Text="（まだ選択されていません）" 
+                                       VerticalAlignment="Center" 
+                                       Foreground="Gray"
+                                       Visibility="{Binding ConfirmedImage, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}"/>
+                        </Grid>
+                    </materialDesign:Card>
+                </Border>
 
                 <TextBlock Text="Gallery" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,20,0,10"/>
 
