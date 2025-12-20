@@ -23,6 +23,7 @@ namespace WpfPrismLearn
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.Register<IGreetingService, GreetingService>();
+            containerRegistry.RegisterSingleton<IThemeService, ThemeService>();
 
             containerRegistry.RegisterForNavigation<MessageView>();
             containerRegistry.RegisterForNavigation<DetailView>();

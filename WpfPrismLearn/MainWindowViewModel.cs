@@ -12,6 +12,8 @@ namespace WpfPrismLearn
     class MainWindowViewModel : BindableBase
     {
         private readonly IGreetingService _greetingService;
+        private readonly IThemeService _themeService;
+
         private readonly IRegionManager _regionManager;
         private readonly IEventAggregator _eventAggregator;
 
@@ -59,6 +61,21 @@ namespace WpfPrismLearn
             set { SetProperty(ref _isConfirmedImageActive, value); }
         }
 
+        // ダークモードかどうか
+        private bool _isDarkMode;
+        public bool IsDarkMode
+        {
+            get { return _isDarkMode; }
+            set
+            {
+                if (SetProperty(ref _isDarkMode, value))
+                {
+                    // プロパティが変わったら即座にテーマを変更
+                    _themeService.SetTheme(_isDarkMode);
+                }
+            }
+        }
+
         public DelegateCommand GreetCommand { get; }
         public DelegateCommand<ImageItem> SelectImageCommand { get; }
         public DelegateCommand CloseModalCommand { get; }
@@ -67,9 +84,14 @@ namespace WpfPrismLearn
 
         public ObservableCollection<ImageItem> ImageItems { get; } = new ObservableCollection<ImageItem>();
 
-        public MainWindowViewModel(IGreetingService greetingService, IRegionManager regionManager, IEventAggregator eventAggregator)
+        public MainWindowViewModel(
+            IGreetingService greetingService,
+            IThemeService themeService,
+            IRegionManager regionManager,
+            IEventAggregator eventAggregator)
         {
             _greetingService = greetingService;
+            _themeService = themeService;
             _regionManager = regionManager;
             _eventAggregator = eventAggregator;
 
