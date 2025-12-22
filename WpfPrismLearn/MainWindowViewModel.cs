@@ -1,8 +1,14 @@
-﻿using Prism.Commands;
-using Prism.Mvvm;
-using Prism.Events;
+﻿using System;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+
+using Prism.Commands;
+using Prism.Mvvm;
+using Prism.Events;
+using Prism.Navigation;
+
 using WpfPrismLearn.Models;
 using WpfPrismLearn.Services;
 using WpfPrismLearn.Events;
@@ -16,6 +22,14 @@ namespace WpfPrismLearn
 
         private readonly IRegionManager _regionManager;
         private readonly IEventAggregator _eventAggregator;
+
+        private readonly IImageApiService _imageApiService;
+
+        //  全ての購読をまとめるゴミ箱
+        private CompositeDisposable _disposables = new CompositeDisposable();
+
+        // スライドショー用の使い捨て容器（Start/Stop切り替え用）
+        private IDisposable? _slideShowSubscription;
 
         private bool _isDetailMode = false;
 
@@ -76,11 +90,35 @@ namespace WpfPrismLearn
             }
         }
 
+        // 自動再生中かどうか
+        private bool _isAutoPlay;
+        public bool IsAutoPlay
+        {
+            get { return _isAutoPlay; }
+            set
+            {
+                if (SetProperty(ref _isAutoPlay, value))
+                {
+                    if (_isAutoPlay) StartSlideShow();
+                    else StopSlideShow();
+                }
+            }
+        }
+
+        // 通信中かどうか
+        private bool _isBusy;
+        public bool IsBusy
+        {
+            get { return _isBusy; }
+            set { SetProperty(ref _isBusy, value); }
+        }
+
         public DelegateCommand GreetCommand { get; }
         public DelegateCommand<ImageItem> SelectImageCommand { get; }
         public DelegateCommand CloseModalCommand { get; }
         public DelegateCommand SwitchContentCommand { get; }
         public DelegateCommand ToggleConfirmedImageCommand { get; }
+        public DelegateCommand ReloadCommand { get; }
 
         public ObservableCollection<ImageItem> ImageItems { get; } = new ObservableCollection<ImageItem>();
 
@@ -88,12 +126,14 @@ namespace WpfPrismLearn
             IGreetingService greetingService,
             IThemeService themeService,
             IRegionManager regionManager,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator,
+            IImageApiService imageApiService)
         {
             _greetingService = greetingService;
             _themeService = themeService;
             _regionManager = regionManager;
             _eventAggregator = eventAggregator;
+            _imageApiService = imageApiService;
 
             _eventAggregator.GetEvent<ImageConfirmedEvent>().Subscribe(image =>
             {
@@ -160,16 +200,15 @@ namespace WpfPrismLearn
                 IsConfirmedImageActive = !IsConfirmedImageActive;
             });
 
-            LoadSampleImages();
-            _eventAggregator = eventAggregator;
-        }
+            // リロードコマンド
+            ReloadCommand = new DelegateCommand(
+                executeMethod: () => LoadImagesAsync(),      // 実行する処理
+                canExecuteMethod: () => !IsBusy              // 実行可能かどうかの判定 (通信中は押せない)
+            )
+            .ObservesProperty(() => IsBusy); // ★重要: IsBusyプロパティが変わるたびに判定を再チェックする
 
-        private void LoadSampleImages()
-        {
-            ImageItems.Add(new ImageItem { Title = "Mountain", ImageUrl = "https://picsum.photos/id/10/200/150" });
-            ImageItems.Add(new ImageItem { Title = "River", ImageUrl = "https://picsum.photos/id/11/200/150" });
-            ImageItems.Add(new ImageItem { Title = "Sea", ImageUrl = "https://picsum.photos/id/12/200/150" });
-            ImageItems.Add(new ImageItem { Title = "Forest", ImageUrl = "https://picsum.photos/id/13/200/150" });
+            LoadImagesAsync();
+            _eventAggregator = eventAggregator;
         }
 
         private void ExecuteGreet()
@@ -189,6 +228,86 @@ namespace WpfPrismLearn
                 });
             }
             IsModalVisible = true; // ★これで表示される
+        }
+
+        private void StartSlideShow()
+        {
+            StopSlideShow(); // 念のため既存のタイマーがあれば消す
+
+            // ★Rx: 2秒ごとにイベントを発火
+            _slideShowSubscription = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(2))
+                .ObserveOn(SynchronizationContext.Current) // ★注意点: UIスレッドに戻す
+                .Subscribe(_ =>
+                {
+                    SelectNextImage();
+                });
+
+            // ★重要: 作成した購読(Subscription)をゴミ箱に入れる
+            _disposables.Add(_slideShowSubscription);
+        }
+
+        private void StopSlideShow()
+        {
+            // 個別のタイマーを停止（破棄）
+            if (_slideShowSubscription != null)
+            {
+                _slideShowSubscription.Dispose();
+                _disposables.Remove(_slideShowSubscription); // ゴミ箱からもリスト削除しておく
+                _slideShowSubscription = null;
+            }
+        }
+
+        private void SelectNextImage()
+        {
+            if (ImageItems.Count == 0) return;
+
+            // 現在選択されている画像のインデックスを探す
+            var currentIndex = -1;
+            for (int i = 0; i < ImageItems.Count; i++)
+            {
+                if (ImageItems[i].IsSelected)
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            // 次の画像へ（最後まで行ったら最初に戻る）
+            var nextIndex = (currentIndex + 1) % ImageItems.Count;
+
+            // 既存のコマンドを再利用して選択処理を実行
+            SelectImageCommand.Execute(ImageItems[nextIndex]);
+        }
+
+        // ---------------------------------------------------------
+        // ★ IDestructible の実装 (画面が閉じられる時に呼ばれる)
+        // ---------------------------------------------------------
+        public void Destroy()
+        {
+            // ★ここが最重要ポイント！
+            // 画面が破棄されるとき、まとめ役の _disposables を破棄します。
+            // これにより、中に入っているタイマー(_slideShowSubscription)も連鎖して止まります。
+            // これを忘れると、画面を閉じても裏で SelectNextImage() が動き続け、エラーになります。
+            _disposables.Dispose();
+        }
+
+        // 非同期メソッド
+        private async void LoadImagesAsync()
+        {
+            // ローディング開始
+            IsBusy = true;
+            ImageItems.Clear();
+
+            // API呼び出し
+            var images = await _imageApiService.GetImagesAsync();
+
+            foreach (var image in images)
+            {
+                ImageItems.Add(image);
+            }
+
+            // ローディング終了
+            IsBusy = false;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Net.Http;
+using System.Windows;
 using Prism.DryIoc;
 using Prism.Ioc;
 using WpfPrismLearn.Services;
@@ -27,6 +28,9 @@ namespace WpfPrismLearn
 
             containerRegistry.RegisterForNavigation<MessageView>();
             containerRegistry.RegisterForNavigation<DetailView>();
+
+            containerRegistry.RegisterSingleton<HttpClient>();
+            containerRegistry.Register<IImageApiService, ImageApiService>();
         }
 
         // 3. アプリケーション起動時の初期化処理を行うメソッド
