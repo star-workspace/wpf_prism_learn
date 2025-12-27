@@ -132,12 +132,15 @@
                 <StackPanel Orientation="Horizontal" Margin="0,20,0,10">
                     <TextBlock Text="Gallery" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,20,0,10"/>
 
-                    <Button Style="{StaticResource MaterialDesignIconButton}"
-                        Command="{Binding ReloadCommand}" 
-                        ToolTip="Reload from API"
-                        Height="24" Width="24" Margin="10,0,0,0">
-                        <materialDesign:PackIcon Kind="Refresh" />
-                    </Button>
+                    <Button Style="{StaticResource IconButtonStyle}"
+                            Command="{Binding ReloadCommand}" 
+                            ToolTip="Reload from API"
+                            Tag="Refresh" 
+                            Content="再読み込み"
+                            BorderBrush="Black"
+                            BorderThickness="5"
+                            Width="Auto" Height="Auto" 
+                            Margin="15,0,0,0"/>
                 </StackPanel>
 
                 <ProgressBar IsIndeterminate="True" 
